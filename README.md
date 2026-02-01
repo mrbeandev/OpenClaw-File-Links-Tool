@@ -2,6 +2,8 @@
 
 A specialized tool designed for **AI agents** to securely move files from their private, isolated workspaces to their owners. It provides agents with a simple REST API to upload results and generates **clean, public URLs** for owners to download those files instantly via a premium web dashboard.
 
+[![clawhub](https://www.clawhub.ai/clawd-logo.png)](https://www.clawhub.ai/mrbeandev/file-links-tool)
+
 **🌍 Deployed at:** `https://your-domain.com/upload/`
 
 ---
