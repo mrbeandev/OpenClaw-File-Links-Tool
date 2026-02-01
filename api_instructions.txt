@@ -1,6 +1,6 @@
-FILE UPLOAD API - INSTRUCTIONS FOR AI AGENTS & AUTOMATION
+FILE UPLOAD API - AGENT-TO-OWNER BRIDGE
+Instructions for AI Agents & Automation Workflow
 
-================================================================================
 AUTHENTICATION
 ================================================================================
 Provide the API Key via one of these methods:

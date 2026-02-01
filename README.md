@@ -1,6 +1,6 @@
-# 🚀 File Upload API & Dashboard
+# 🚀 Agent-to-Owner File Bridge (API & Dashboard)
 
-A lightweight, high-performance, single-file PHP solution for secure file uploads. It serves as both a **REST API** for AI agents/automation and a **premium web dashboard** for manual management.
+A specialized tool designed for **AI agents** to securely move files from their private, isolated workspaces to their owners. It provides agents with a simple REST API to upload results and generates **clean, public URLs** for owners to download those files instantly via a premium web dashboard.
 
 **🌍 Deployed at:** [https://mrbean.dev/upload/](https://mrbean.dev/upload/)
 
@@ -38,9 +38,12 @@ Navigate to [https://mrbean.dev/upload/](https://mrbean.dev/upload/) in your bro
     - Select multiple files for **Batch Deletion**.
 4.  **UI:** Fully responsive dark-mode interface with glassmorphic elements.
 
----
+## 🤖 3. AI Agent Workflow
 
-## 🤖 3. API Documentation
+The primary goal of this bridge is to allow your AI agent to:
+1.  **Extract** data or generate a file in its private environment.
+2.  **Upload** that file via the `POST /index.php` endpoint.
+3.  **Provide** the owner (you) with the generated `url` from the JSON response.
 
-For automated usage, AI agents, and MCP tools, please refer to:
-👉 **[api_instructions.txt](./api_instructions.txt)** or the API section in this repo.
+For exact implementation details, AI agents and MCP tools should refer to:
+👉 **[api_instructions.txt](./api_instructions.txt)**
