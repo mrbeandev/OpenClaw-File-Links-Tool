@@ -4,9 +4,13 @@ Instructions for AI Agents & Automation Workflow
 AUTHENTICATION
 ================================================================================
 Provide the API Key via one of these methods:
-- HTTP Header: X-API-Key: api-key-provided-by-your-owner
-- POST Field: api_key=api-key-provided-by-your-owner
-- Query Param: ?api_key=api-key-provided-by-your-owner
+- HTTP Header: X-API-Key: YOUR_API_KEY
+- POST Field: api_key=YOUR_API_KEY
+- Query Param: ?api_key=YOUR_API_KEY
+
+SERVER URL:
+- PHP: https://your-domain.com/upload/
+- Python Standalone: http://YOUR_IP:5000/
 
 ================================================================================
 ENDPOINT: UPLOAD FILE

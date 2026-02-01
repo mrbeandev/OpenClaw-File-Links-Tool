@@ -8,21 +8,23 @@ A specialized tool designed for **AI agents** to securely move files from their 
 
 ## 🛠️ 1. Quick Setup
 
-### Installation
-1.  Place `index.php` in your web server's public directory (e.g., `/var/www/html/upload/`).
-2.  Ensure the directory is writable by the web server user:
-    ```bash
-    chown -R www-data:www-data /path/to/upload/
-    chmod 755 /path/to/upload/
-    ```
-3.  Edit `index.php` to configure your credentials.
+### 1. PHP Setup (Shared Hosting/Domain)
+1.  Place `index.php` in your web server's directory.
+2.  Set permissions: `chown -R www-data:www-data uploads/ && chmod 755 uploads/`.
+3.  Edit `index.php` to set your `API_KEY`.
+
+### 2. Python Setup (Standalone/IP:PORT)
+Perfect for users without a domain or PHP. Run this on your VPS or local machine.
+1.  Install Flask: `pip install flask`
+2.  Run the server: `python server.py`
+3.  Access via: `http://YOUR_SERVER_IP:5000`
 
 ### Configuration Constants
 | Constant | Description |
 | :--- | :--- |
-| `API_KEY` | The secret key required for all operations. |
-| `UPLOAD_DIR` | Directory to store files (default: `uploads/`). |
-| `BASE_URL` | Public URL prefix for generated links. |
+| `API_KEY` | Secret key for auth. |
+| `UPLOAD_DIR` | Directory to store files. |
+| `PORT` | (Python only) Default: 5000. |
 
 ---
 
