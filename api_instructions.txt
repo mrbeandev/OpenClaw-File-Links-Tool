@@ -1,0 +1,42 @@
+FILE UPLOAD API - INSTRUCTIONS FOR AI AGENTS & AUTOMATION
+
+================================================================================
+AUTHENTICATION
+================================================================================
+Provide the API Key via one of these methods:
+- HTTP Header: X-API-Key: api-key-provided-by-your-owner
+- POST Field: api_key=api-key-provided-by-your-owner
+- Query Param: ?api_key=api-key-provided-by-your-owner
+
+================================================================================
+ENDPOINT: UPLOAD FILE
+================================================================================
+POST /index.php
+Parameters: file (Multipart form-data)
+
+cURL Example:
+curl -X POST https://mrbean.dev/upload/ \
+  -H "X-API-Key: api-key-provided-by-your-owner" \
+  -F "file=@/path/to/archive.zip"
+
+Python Example:
+import requests
+url = "https://mrbean.dev/upload/"
+headers = {"X-API-Key": "api-key-provided-by-your-owner"}
+files = {"file": open("data.zip", "rb")}
+response = requests.post(url, headers=headers, files=files)
+
+================================================================================
+ENDPOINT: LIST FILES
+================================================================================
+GET /index.php?action=list
+Returns JSON list of files sorted by newest first.
+
+================================================================================
+ENDPOINT: DELETE FILES
+================================================================================
+POST /index.php?action=delete
+Payload (JSON): {"files": ["filename.zip"]}
+
+Example:
+requests.post(url + "?action=delete", json={"files": ["file1.zip"]}, headers=headers)
