@@ -5,16 +5,27 @@
  * * For usage instructions and API documentation, please refer to DOC.md
  */
 
-// --- CONFIGURATION ---
+// --- SECURE CONFIG LOADING ---
+function loadEnv($path) {
+    if (!file_exists($path)) return;
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        list($name, $value) = explode('=', $line, 2);
+        $_ENV[trim($name)] = trim($value);
+        putenv(trim($name) . "=" . trim($value));
+    }
+}
+loadEnv(__DIR__ . '/.env');
 
-// 1. Set a secure API Key
-define('API_KEY', 'NaNQQWBDM5oCyGqB0xmxPAySYXbL36oYcL');
+// 1. Set a secure API Key (Priority: .env > Environment Variable > Default)
+define('API_KEY', getenv('API_KEY') ?: ($_ENV['API_KEY'] ?? 'CHANGE_ME_IN_ENV'));
 
-// 2. Define the upload directory (relative to this script)
-define('UPLOAD_DIR', 'uploads/');
+// 2. Define the upload directory
+define('UPLOAD_DIR', getenv('UPLOAD_DIR') ?: 'uploads/');
 
 // 3. Base URL for the download link
-define('BASE_URL', 'https://mrbean.dev/upload/');
+define('BASE_URL', (isset($_SERVER['HTTPS']) ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/');
 
 // 4. Security: Allow only specific extensions
 $allowed_extensions = ['zip', 'md', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'json', 'pdf'];

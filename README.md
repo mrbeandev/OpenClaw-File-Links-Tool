@@ -10,14 +10,16 @@ A specialized tool designed for **AI agents** to securely move files from their 
 
 ### 1. PHP Setup (Shared Hosting/Domain)
 1.  Place `index.php` in your web server's directory.
-2.  Set permissions: `chown -R www-data:www-data uploads/ && chmod 755 uploads/`.
-3.  Edit `index.php` to set your `API_KEY`.
+2.  Create a `.env` file from `.env.example`: `cp .env.example .env`.
+3.  Set permissions: `chown -R www-data:www-data uploads/ && chmod 755 uploads/`.
+4.  Edit `.env` to set your `API_KEY`.
 
 ### 2. Python Setup (Standalone/IP:PORT)
 Perfect for users without a domain or PHP. Run this on your VPS or local machine.
-1.  Install Flask: `pip install flask`
-2.  Run the server: `python server.py`
-3.  Access via: `http://YOUR_SERVER_IP:5000`
+1.  Create a `.env` file from `.env.example`: `cp .env.example .env`.
+2.  Install Flask: `pip install flask`
+3.  Run the server: `python server.py`
+4.  Access via: `http://YOUR_SERVER_IP:5000`
 
 ### Configuration Constants
 | Constant | Description |

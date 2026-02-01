@@ -4,11 +4,23 @@ import time
 from datetime import datetime
 from flask import Flask, request, jsonify, send_from_directory, render_template_string
 
-# --- CONFIGURATION ---
-API_KEY = "change-me-to-something-secure"
-UPLOAD_DIR = "uploads"
-PORT = 5000
-HOST = "0.0.0.0"  # Allows access via IP:PORT
+# --- SECURE CONFIG LOADING ---
+def load_env():
+    env_path = os.path.join(os.path.dirname(__file__), ".env")
+    if os.path.exists(env_path):
+        with open(env_path, "r") as f:
+            for line in f:
+                if line.strip() and not line.startswith("#"):
+                    key, value = line.strip().split("=", 1)
+                    os.environ[key] = value
+
+load_env()
+
+# Priority: .env > Environment Variable > Hardcoded Default
+API_KEY = os.getenv("API_KEY", "CHANGE_ME_IN_ENV")
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
+PORT = int(os.getenv("PORT", 5000))
+HOST = "0.0.0.0"
 
 # Ensure upload directory exists
 if not os.path.exists(UPLOAD_DIR):
