@@ -2,7 +2,7 @@
 
 A specialized tool designed for **AI agents** to securely move files from their private, isolated workspaces to their owners. It provides agents with a simple REST API to upload results and generates **clean, public URLs** for owners to download those files instantly via a premium web dashboard.
 
-**🌍 Deployed at:** [https://mrbean.dev/upload/](https://mrbean.dev/upload/)
+**🌍 Deployed at:** `https://your-domain.com/upload/`
 
 ---
 
@@ -32,7 +32,7 @@ Perfect for users without a domain or PHP. Run this on your VPS or local machine
 
 ## �️ 2. Dashboard Usage
 
-Navigate to [https://mrbean.dev/upload/](https://mrbean.dev/upload/) in your browser for a premium management experience:
+Navigate to your deployment URL in your browser for a premium management experience:
 
 1.  **Auth:** Enter your API Key when prompted (saved locally for convenience).
 2.  **Upload:** Drag & Drop files anywhere or click the upload zone.

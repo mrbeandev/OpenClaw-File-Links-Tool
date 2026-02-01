@@ -19,14 +19,14 @@ POST /index.php
 Parameters: file (Multipart form-data)
 
 cURL Example:
-curl -X POST https://mrbean.dev/upload/ \
-  -H "X-API-Key: api-key-provided-by-your-owner" \
+curl -X POST https://your-domain.com/upload/ \
+  -H "X-API-Key: YOUR_API_KEY" \
   -F "file=@/path/to/archive.zip"
 
 Python Example:
 import requests
-url = "https://mrbean.dev/upload/"
-headers = {"X-API-Key": "api-key-provided-by-your-owner"}
+url = "https://your-domain.com/upload/"
+headers = {"X-API-Key": "YOUR_API_KEY"}
 files = {"file": open("data.zip", "rb")}
 response = requests.post(url, headers=headers, files=files)
 

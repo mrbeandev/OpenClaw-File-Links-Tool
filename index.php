@@ -1,8 +1,8 @@
 <?php
 /**
  * Simple File Upload API & Dashboard
- * Deployed at: mrbean.dev/upload/index.php
- * * For usage instructions and API documentation, please refer to DOC.md
+ * Deployed at: your-domain.com/upload/
+ * * For usage instructions and API documentation, please refer to README.md
  */
 
 // --- SECURE CONFIG LOADING ---
@@ -378,7 +378,7 @@ function serveFrontend() {
                 </div>
                 <div>
                     <h1 class="text-xl font-bold">Upload Center</h1>
-                    <p class="text-xs text-gray-400">mrbean.dev</p>
+                    <p class="text-xs text-gray-400">File Bridge</p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
