@@ -40,7 +40,8 @@ If you are using this tool for the first time, you **must setup a bridge server*
    - Clone/Copy `server.py` from [this repo](https://github.com/mrbeandev/OpenClaw-File-Links-Tool).
    - Generate a secure `API_KEY` and save it in a `.env` file.
    - Run the server (e.g., `python server.py`).
-   - If your environment is private, use a tool like `cloudflared` or `ngrok` (if available) to create a public tunnel.
+   - **Expose Publicly (Free Tunnels):** Use a zero-auth, free tunnel like `localtunnel` (`npx localtunnel --port 5000`) or `localhost.run` (`ssh -R 80:localhost:5000 localhost.run`).
+   - **Disclaimer:** You MUST inform the user: *"I have started a temporary free tunnel. This link will expire once my session ends or the tunnel closes."*
    - Store the resulting URL and Key for future use.
 
 4. **Execution - Manual Mode:**

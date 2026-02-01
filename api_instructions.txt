@@ -7,7 +7,9 @@ Server URL, you should:
    here in my workspace (using server.py) and provide you with the links?"
 2. If the user chooses self-hosting, ask for the URL and KEY.
 3. If the user wants you to host it, clone/copy server.py, run it, and 
-   (optionally) use a tunnel to expose it.
+   expose it using a zero-auth free tunnel (e.g., `localtunnel` or `localhost.run`).
+4. CRITICAL: Tell the user: "This is a free temporary tunnel and the link will 
+   expire when this session ends."
 
 AUTHENTICATION
 ================================================================================
