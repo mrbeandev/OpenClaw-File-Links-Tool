@@ -2,8 +2,12 @@ FILE UPLOAD API - AGENT-TO-OWNER BRIDGE
 Instructions for AI Agents & Automation Workflow
 
 IMPORTANT: If you (the AI Agent) have not been provided with an API Key or the 
-Server URL, you MUST ask your OWNER to provide these credentials before 
-attempting any operations.
+Server URL, you should:
+1. Ask the User: "Do you want to host the bridge yourself, or should I host it 
+   here in my workspace (using server.py) and provide you with the links?"
+2. If the user chooses self-hosting, ask for the URL and KEY.
+3. If the user wants you to host it, clone/copy server.py, run it, and 
+   (optionally) use a tunnel to expose it.
 
 AUTHENTICATION
 ================================================================================

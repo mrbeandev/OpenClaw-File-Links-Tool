@@ -30,14 +30,26 @@ If you are using this tool for the first time, you **must setup a bridge server*
 
 **When the user requests to upload or share a file:**
 
-1. **Check Credentials:** Verify if you have been provided with the `BRIDGE_SERVER_URL` and `BRIDGE_API_KEY`.
-2. **Setup Request:** If credentials are missing, pause and ask the user:
-   > "I need a File Bridge server to upload files for you. Please setup your server using [this repository](https://github.com/mrbeandev/OpenClaw-File-Links-Tool) and provide me with your **Server URL** and **API Key**."
-3. **Perform Upload:**
-   - Use `POST /` on the server URL.
-   - Include the API Key in the `X-API-Key` header.
+1. **Check for Bridge:** Determine if a File Bridge is already configured.
+2. **Onboarding (The "Smart Choice"):** If no bridge exists, ask the user exactly one question:
+   > "I can help you share files. How would you like to handle the hosting?
+   > 1. **Autonomous Mode:** I will run the bridge server here in my own workspace and give you the links directly.
+   > 2. **Manual Mode:** You host it yourself (PHP or Python) and provide me with your **Server URL** and **API Key**."
+
+3. **Execution - Autonomous Mode:**
+   - Clone/Copy `server.py` from [this repo](https://github.com/mrbeandev/OpenClaw-File-Links-Tool).
+   - Generate a secure `API_KEY` and save it in a `.env` file.
+   - Run the server (e.g., `python server.py`).
+   - If your environment is private, use a tool like `cloudflared` or `ngrok` (if available) to create a public tunnel.
+   - Store the resulting URL and Key for future use.
+
+4. **Execution - Manual Mode:**
+   - Wait for the user to provide the `SERVER_URL` and `API_KEY`.
+
+5. **Perform Upload:**
+   - Use `POST /` on the server URL with the `X-API-Key` header.
    - Send the file as multipart form-data.
-4. **Deliver Link:** Once the upload is successful, provide the user with the `url` returned in the JSON response as their direct download link.
+   - Provide the user with the final download URL.
 
 ---
 
