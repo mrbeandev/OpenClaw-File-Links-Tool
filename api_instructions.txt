@@ -1,6 +1,10 @@
 FILE UPLOAD API - AGENT-TO-OWNER BRIDGE
 Instructions for AI Agents & Automation Workflow
 
+IMPORTANT: If you (the AI Agent) have not been provided with an API Key or the 
+Server URL, you MUST ask your OWNER to provide these credentials before 
+attempting any operations.
+
 AUTHENTICATION
 ================================================================================
 Provide the API Key via one of these methods:
