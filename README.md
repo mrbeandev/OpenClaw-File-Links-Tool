@@ -40,7 +40,8 @@ Navigate to your deployment URL in your browser for a premium management experie
 2.  **Upload:** Drag & Drop files anywhere or click the upload zone.
 3.  **Manage:**
     - Click the **Link Icon** to copy the direct URL.
-    - Click the **Eye Icon** to view/preview the file.
+    - Click the **Eye Icon** to view/preview the file (rich syntax highlighting for code).
+    - **ZIP Inspection:** Open any ZIP to browse and view its inner files without downloading.
     - Select multiple files for **Batch Deletion**.
 4.  **UI:** Fully responsive dark-mode interface with glassmorphic elements.
 

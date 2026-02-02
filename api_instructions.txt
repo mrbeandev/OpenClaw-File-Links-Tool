@@ -46,6 +46,31 @@ ENDPOINT: LIST FILES
 GET /index.php?action=list
 Returns JSON list of files sorted by newest first.
 
+Each file object includes:
+- url: The raw download link.
+- view_url: A premium viewer page (useful for MD, TXT, JSON, Images, PDF).
+- is_zip: Boolean. If true, the file can be inspected using the viewer.
+
+Agent Tip: When providing links to the user, the `view_url` is often preferred for 
+reading content, while the `url` is better for direct downloads.
+
+================================================================================
+ENDPOINT: VIEW FILE (WEB)
+================================================================================
+GET /index.php?action=view&file=FILENAME
+This endpoint serves a rich HTML page for viewing file content.
+
+Examples:
+- View a Markdown file: `index.php?action=view&file=report.md`
+- View an Image: `index.php?action=view&file=snapshot.png`
+
+For ZIP archives: 
+GET /index.php?action=view&file=ARCHIVE.zip&inner_file=PATH_INSIDE_ZIP
+Allows deep-linking directly into a specific file inside an uploaded ZIP archive.
+
+Example:
+- View code inside a ZIP: `index.php?action=view&file=project.zip&inner_file=src/main.py`
+
 ================================================================================
 ENDPOINT: DELETE FILES
 ================================================================================
