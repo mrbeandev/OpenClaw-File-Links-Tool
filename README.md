@@ -14,7 +14,8 @@ A specialized tool designed for **AI agents** to securely move files from their 
 1.  Place `index.php` in your web server's directory.
 2.  Create a `.env` file from `.env.example`: `cp .env.example .env`.
 3.  Set permissions: `chown -R www-data:www-data uploads/ && chmod 755 uploads/`.
-4.  Edit `.env` to set your `API_KEY`.
+4.  **Requirement:** Ensure `php-zip` extension is installed (`sudo apt install php-zip`).
+5.  Edit `.env` to set your `API_KEY`.
 
 ### 2. Python Setup (Standalone/IP:PORT)
 Perfect for users without a domain or PHP. Run this on your VPS or local machine.

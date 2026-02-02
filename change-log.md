@@ -12,3 +12,13 @@ Feature: Rich File Viewer, Zip Inspection, and UI Overhaul
 - Fixed PHP warnings and updated gitignore.
 
 ---
+
+## 2026-02-02 14:07:56
+
+Robust ZIP Handling & Documentation Updates
+
+- Implemented `class_exists('ZipArchive')` check to prevent server errors when the extension is missing.
+- Added a user-friendly UI warning in the viewer if ZIP inspection is unavailable.
+- Updated `README.md` and `SKILL.md` to explicitly list `php-zip` as a requirement for full functionality.
+
+---

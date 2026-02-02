@@ -15,6 +15,7 @@ This skill allows an AI Agent to bridge the gap between its private, isolated wo
 ## 🛠 Prerequisites & Setup
 
 If you are using this tool for the first time, you **must setup a bridge server** on your own hosting (PHP) or via the standalone Python script (IP:PORT).
+*Note: For ZIP inspection on PHP, the `php-zip` extension is required.*
 
 **GitHub Repository:** [https://github.com/mrbeandev/OpenClaw-File-Links-Tool](https://github.com/mrbeandev/OpenClaw-File-Links-Tool)
 

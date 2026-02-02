@@ -606,16 +606,18 @@ function renderFileViewer($filename, $path) {
     $isInsideZip = false;
 
     if ($ext === 'zip' && $innerFile) {
-        $zip = new ZipArchive;
-        if ($zip->open($path) === TRUE) {
-            $innerContent = $zip->getFromName($innerFile);
-            $zip->close();
-            if ($innerContent !== false) {
-                $type = 'text';
-                $displayContent = htmlspecialchars($innerContent);
-                $innerExt = strtolower(pathinfo($innerFile, PATHINFO_EXTENSION));
-                $language = ($innerExt === 'md') ? 'markdown' : (($innerExt === 'js') ? 'javascript' : (in_array($innerExt, ['txt', 'json', 'css', 'js', 'php', 'html', 'xml', 'yaml', 'yml']) ? $innerExt : 'text'));
-                $isInsideZip = true;
+        if (class_exists('ZipArchive')) {
+            $zip = new ZipArchive;
+            if ($zip->open($path) === TRUE) {
+                $innerContent = $zip->getFromName($innerFile);
+                $zip->close();
+                if ($innerContent !== false) {
+                    $type = 'text';
+                    $displayContent = htmlspecialchars($innerContent);
+                    $innerExt = strtolower(pathinfo($innerFile, PATHINFO_EXTENSION));
+                    $language = ($innerExt === 'md') ? 'markdown' : (($innerExt === 'js') ? 'javascript' : (in_array($innerExt, ['txt', 'json', 'css', 'js', 'php', 'html', 'xml', 'yaml', 'yml']) ? $innerExt : 'text'));
+                    $isInsideZip = true;
+                }
             }
         }
     }
@@ -633,19 +635,24 @@ function renderFileViewer($filename, $path) {
         } elseif ($ext === 'zip') {
             $type = 'zip';
             $zipFiles = [];
-            $zip = new ZipArchive;
-            if ($zip->open($path) === TRUE) {
-                for ($i = 0; $i < $zip->numFiles; $i++) {
-                    $stat = $zip->statIndex($i);
-                    $fext = strtolower(pathinfo($stat['name'], PATHINFO_EXTENSION));
-                    $zipFiles[] = [
-                        'name' => $stat['name'],
-                        'size' => $stat['size'],
-                        'compressed' => $stat['comp_size'],
-                        'is_viewable' => in_array($fext, ['txt', 'md', 'json', 'css', 'js', 'php', 'html', 'xml', 'yaml', 'yml'])
-                    ];
+            
+            if (class_exists('ZipArchive')) {
+                $zip = new ZipArchive;
+                if ($zip->open($path) === TRUE) {
+                    for ($i = 0; $i < $zip->numFiles; $i++) {
+                        $stat = $zip->statIndex($i);
+                        $fext = strtolower(pathinfo($stat['name'], PATHINFO_EXTENSION));
+                        $zipFiles[] = [
+                            'name' => $stat['name'],
+                            'size' => $stat['size'],
+                            'compressed' => $stat['comp_size'],
+                            'is_viewable' => in_array($fext, ['txt', 'md', 'json', 'css', 'js', 'php', 'html', 'xml', 'yaml', 'yml'])
+                        ];
+                    }
+                    $zip->close();
                 }
-                $zip->close();
+            } else {
+                $zipError = true;
             }
         }
     }
@@ -746,37 +753,45 @@ function renderFileViewer($filename, $path) {
                     <iframe src="<?php echo $rawUrl; ?>" class="w-full h-full border-none"></iframe>
                 </div>
             <?php elseif ($type === 'zip'): ?>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="bg-gray-900/50 text-gray-400 text-xs uppercase tracking-wider">
-                                <th class="px-6 py-4 font-semibold uppercase">File Name</th>
-                                <th class="px-6 py-4 font-semibold uppercase text-right">Size</th>
-                                <th class="px-6 py-4 font-semibold uppercase text-right">Compressed</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-800">
-                            <?php foreach ($zipFiles as $file): ?>
-                                <tr class="hover:bg-gray-800/50 transition-colors">
-                                    <td class="px-6 py-4 flex items-center justify-between gap-3">
-                                        <div class="flex items-center gap-3">
-                                            <i class="ph ph-file text-gray-400"></i>
-                                            <span class="text-sm font-medium"><?php echo htmlspecialchars($file['name']); ?></span>
-                                        </div>
-                                        <?php if ($file['is_viewable']): ?>
-                                            <a href="index.php?action=view&file=<?php echo urlencode($filename); ?>&inner_file=<?php echo urlencode($file['name']); ?>" 
-                                               class="text-xs bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded hover:bg-indigo-500/20 transition-colors">
-                                                View Content
-                                            </a>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-400 text-right"><?php echo formatBytes($file['size']); ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-500 text-right"><?php echo formatBytes($file['compressed']); ?></td>
+                <?php if (isset($zipError)): ?>
+                    <div class="p-20 text-center">
+                        <i class="ph ph-warning-circle text-6xl text-amber-500 mb-4"></i>
+                        <h2 class="text-xl font-medium text-gray-300">ZIP Extension Missing</h2>
+                        <p class="text-gray-500 mt-2">The PHP `zip` extension is not installed. Unable to inspect contents.</p>
+                    </div>
+                <?php else: ?>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-gray-900/50 text-gray-400 text-xs uppercase tracking-wider">
+                                    <th class="px-6 py-4 font-semibold uppercase">File Name</th>
+                                    <th class="px-6 py-4 font-semibold uppercase text-right">Size</th>
+                                    <th class="px-6 py-4 font-semibold uppercase text-right">Compressed</th>
                                 </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800">
+                                <?php foreach ($zipFiles as $file): ?>
+                                    <tr class="hover:bg-gray-800/50 transition-colors">
+                                        <td class="px-6 py-4 flex items-center justify-between gap-3">
+                                            <div class="flex items-center gap-3">
+                                                <i class="ph ph-file text-gray-400"></i>
+                                                <span class="text-sm font-medium"><?php echo htmlspecialchars($file['name']); ?></span>
+                                            </div>
+                                            <?php if ($file['is_viewable']): ?>
+                                                <a href="index.php?action=view&file=<?php echo urlencode($filename); ?>&inner_file=<?php echo urlencode($file['name']); ?>" 
+                                                   class="text-xs bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded hover:bg-indigo-500/20 transition-colors">
+                                                    View Content
+                                                </a>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-400 text-right"><?php echo formatBytes($file['size']); ?></td>
+                                        <td class="px-6 py-4 text-sm text-gray-500 text-right"><?php echo formatBytes($file['compressed']); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
             <?php else: ?>
                 <div class="p-20 text-center">
                     <i class="ph ph-file-search text-6xl text-gray-600 mb-4"></i>
