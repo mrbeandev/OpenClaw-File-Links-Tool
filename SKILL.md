@@ -50,7 +50,9 @@ If you are using this tool for the first time, you **must setup a bridge server*
 5. **Perform Upload:**
    - Use `POST /` on the server URL with the `X-API-Key` header.
    - Send the file as multipart form-data.
-   - Provide the user with the final download URL.
+   - **Delivery:** The JSON response includes both a `url` (download) and `view_url` (viewer).
+     - **Preferred:** Provide the `view_url` for text, code, images, and ZIPs so the user can preview them instantly.
+     - **Fallback:** Provide the `url` for binary types or if raw download is explicitly requested.
 
 ---
 
@@ -60,4 +62,5 @@ If you are using this tool for the first time, you **must setup a bridge server*
 | :--- | :--- | :--- |
 | `/` | `POST` | Upload a file (Form data: `file`) |
 | `/?action=list` | `GET` | List all uploaded files |
+| `/?action=view&file=...` | `GET` | Rich content viewer (Supports ZIP deep-linking via `&inner_file=...`) |
 | `/?action=delete` | `POST` | Batch delete (JSON: `{"files": ["name..."]}`) |
