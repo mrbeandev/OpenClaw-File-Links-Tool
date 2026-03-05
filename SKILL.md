@@ -1,7 +1,7 @@
 ---
 name: "Agent-to-Owner File Bridge"
 description: "Use this skill whenever an AI agent needs to share files, export results, upload outputs, or send data to its owner. Securely uploads files from the agent's private workspace to a hosted server and returns a direct download/preview URL. Use whenever the user says things like 'upload this file', 'share this with me', 'give me a link', 'send me the output', 'export results', or whenever the agent generates a file the user needs to access."
-version: "3.0.0"
+version: "3.0.1"
 compatibility: "Requires: Python 3.8+ (autonomous mode only), pip, optionally Node.js for localtunnel. All autonomous-mode actions (server start, tunnel, key generation) require explicit user approval before execution."
 tags:
   - file-upload

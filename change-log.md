@@ -1,5 +1,17 @@
 
-## 2026-03-05
+## 2026-03-05 (v3.0.1)
+
+fix: improve SKILL.md to address security scanner concerns
+
+- Added compatibility section declaring required tools and explicit permission model
+- Added Permissions & Security Boundaries table
+- Every sensitive autonomous action now requires explicit step-by-step user confirmation
+- Reordered: Manual Mode (recommended) presented first, Autonomous Mode second
+- Removed implicit "clone and run" language; clarified open-source self-hosted nature
+
+---
+
+## 2026-03-05 (v3.0.0)
 
 feat: live upload progress, client-side validation & expanded file type support
 
