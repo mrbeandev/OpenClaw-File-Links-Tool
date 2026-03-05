@@ -1,4 +1,13 @@
 
+## 2026-03-05 (v3.0.2)
+
+fix: declare env vars in SKILL.md frontmatter to resolve security scanner metadata mismatch
+
+- Added `env` section to frontmatter declaring API_KEY and SERVER_URL with descriptions
+- Bumped version to 3.0.2
+
+---
+
 ## 2026-03-05 (v3.0.1)
 
 fix: improve SKILL.md to address security scanner concerns
