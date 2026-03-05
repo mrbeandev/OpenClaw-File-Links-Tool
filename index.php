@@ -28,7 +28,18 @@ define('UPLOAD_DIR', getenv('UPLOAD_DIR') ?: 'uploads/');
 define('BASE_URL', (isset($_SERVER['HTTPS']) ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/');
 
 // 4. Security: Allow only specific extensions
-$allowed_extensions = ['zip', 'md', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'json', 'pdf'];
+$allowed_extensions = [
+    // Archives
+    'zip', 'tar', 'gz', 'tgz', 'bz2', 'xz', '7z', 'rar', 'zst',
+    // Images
+    'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'tiff', 'tif', 'ico', 'avif', 'heic', 'heif',
+    // Videos
+    'mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv', 'webm', 'm4v', 'mpeg', 'mpg', '3gp',
+    // Documents
+    'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'csv', 'rtf',
+    // Text / Data
+    'txt', 'md', 'json',
+];
 
 // --- BACKEND LOGIC ---
 
@@ -83,9 +94,10 @@ if ($method === 'GET' && $action === 'list') {
                 'created' => filemtime($path),
                 'url' => rtrim(BASE_URL, '/') . '/' . UPLOAD_DIR . $file,
                 'view_url' => rtrim(BASE_URL, '/') . '/index.php?action=view&file=' . urlencode($file),
-                'is_image' => in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']),
-                'is_zip' => ($ext === 'zip'),
-                'is_text' => in_array($ext, ['txt', 'md', 'json', 'css', 'js', 'php', 'html'])
+                'is_image' => in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'tiff', 'tif', 'ico', 'avif', 'heic', 'heif']),
+                'is_zip'   => in_array($ext, ['zip', 'tar', 'gz', 'tgz', 'bz2', 'xz', '7z', 'rar', 'zst']),
+                'is_video' => in_array($ext, ['mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv', 'webm', 'm4v', 'mpeg', 'mpg', '3gp']),
+                'is_text'  => in_array($ext, ['txt', 'md', 'json', 'css', 'js', 'php', 'html'])
             ];
         }
     }
@@ -223,6 +235,30 @@ function serveFrontend() {
                 dragHover: false,
                 toast: { show: false, message: '', type: 'success' },
 
+                // Allowed extensions (mirrors server-side list)
+                allowedExtensions: [
+                    // Archives
+                    'zip','tar','gz','tgz','bz2','xz','7z','rar','zst',
+                    // Images
+                    'jpg','jpeg','png','gif','webp','svg','bmp','tiff','tif','ico','avif','heic','heif',
+                    // Videos
+                    'mp4','mov','avi','mkv','wmv','flv','webm','m4v','mpeg','mpg','3gp',
+                    // Documents
+                    'pdf','doc','docx','xls','xlsx','ppt','pptx','odt','ods','odp','csv','rtf',
+                    // Text / Data
+                    'txt','md','json',
+                ],
+
+                // Upload progress state
+                uploadProgress: 0,
+                uploadedBytes: 0,
+                totalBytes: 0,
+                uploadSpeed: 0,       // bytes/sec
+                uploadETA: 0,         // seconds
+                currentFileName: '',
+                currentFileIndex: 0,
+                totalFiles: 0,
+
                 init() {
                     if (this.apiKey) {
                         this.verifyAndFetch();
@@ -267,21 +303,97 @@ function serveFrontend() {
                     if (files.length > 0) this.handleFiles(files);
                 },
 
+                // Returns { valid: File[], rejected: string[] }
+                validateFiles(fileList) {
+                    const valid = [];
+                    const rejected = [];
+                    for (const file of fileList) {
+                        const ext = file.name.split('.').pop().toLowerCase();
+                        if (this.allowedExtensions.includes(ext)) {
+                            valid.push(file);
+                        } else {
+                            rejected.push(file.name);
+                        }
+                    }
+                    return { valid, rejected };
+                },
+
+                uploadFileXHR(formData, file) {
+                    return new Promise((resolve) => {
+                        const xhr = new XMLHttpRequest();
+                        const startTime = Date.now();
+                        let lastLoaded = 0;
+                        let lastTime = startTime;
+
+                        xhr.upload.addEventListener('progress', (e) => {
+                            if (!e.lengthComputable) return;
+                            const now = Date.now();
+                            const elapsed = (now - lastTime) / 1000; // seconds since last sample
+
+                            if (elapsed >= 0.25) { // sample every 250ms for smooth speed
+                                const delta = e.loaded - lastLoaded;
+                                this.uploadSpeed = delta / elapsed;
+                                lastLoaded = e.loaded;
+                                lastTime = now;
+                            }
+
+                            this.uploadedBytes = e.loaded;
+                            this.totalBytes    = e.total;
+                            this.uploadProgress = Math.round((e.loaded / e.total) * 100);
+
+                            const remaining = e.total - e.loaded;
+                            this.uploadETA = this.uploadSpeed > 0
+                                ? Math.ceil(remaining / this.uploadSpeed)
+                                : null;
+                        });
+
+                        xhr.addEventListener('load', () => {
+                            this.uploadProgress = 100;
+                            try { resolve(JSON.parse(xhr.responseText)); }
+                            catch (e) { resolve({ status: 'error', message: 'Parse error' }); }
+                        });
+
+                        xhr.addEventListener('error', () => {
+                            resolve({ status: 'error', message: 'Network error' });
+                        });
+
+                        xhr.open('POST', 'index.php');
+                        xhr.setRequestHeader('X-API-Key', this.apiKey);
+                        xhr.send(formData);
+                    });
+                },
+
                 async handleFiles(fileList) {
+                    const { valid, rejected } = this.validateFiles(fileList);
+
+                    // Warn about rejected files immediately — before any upload
+                    if (rejected.length > 0) {
+                        const names = rejected.length <= 2
+                            ? rejected.join(', ')
+                            : rejected.slice(0, 2).join(', ') + ` +${rejected.length - 2} more`;
+                        this.showToast(`Blocked (unsupported type): ${names}`, 'error');
+                    }
+
+                    if (valid.length === 0) return;
+
                     this.uploading = true;
+                    this.totalFiles = valid.length;
                     let successCount = 0;
-                    
-                    for (let i = 0; i < fileList.length; i++) {
+
+                    for (let i = 0; i < valid.length; i++) {
+                        this.currentFileIndex = i + 1;
+                        this.currentFileName  = valid[i].name;
+                        this.uploadProgress   = 0;
+                        this.uploadedBytes    = 0;
+                        this.totalBytes       = valid[i].size;
+                        this.uploadSpeed      = 0;
+                        this.uploadETA        = null;
+
                         const formData = new FormData();
-                        formData.append('file', fileList[i]);
-                        formData.append('api_key', this.apiKey);
+                        formData.append('file', valid[i]);
 
                         try {
-                            const res = await fetch('index.php', {
-                                method: 'POST',
-                                body: formData
-                            });
-                            const data = await res.json();
+                            const data = await this.uploadFileXHR(formData, valid[i]);
                             if (data.status === 'success') successCount++;
                             else this.showToast(data.message, 'error');
                         } catch (e) {
@@ -290,10 +402,26 @@ function serveFrontend() {
                     }
 
                     if (successCount > 0) {
-                        this.showToast(`Uploaded ${successCount} files`);
+                        this.showToast(`Uploaded ${successCount} file${successCount > 1 ? 's' : ''}`);
                         await this.verifyAndFetch();
                     }
                     this.uploading = false;
+                    this.uploadProgress = 0;
+                },
+
+                formatSpeed(bytesPerSec) {
+                    if (!bytesPerSec || bytesPerSec <= 0) return '';
+                    const k = 1024;
+                    if (bytesPerSec >= k * k) return (bytesPerSec / (k * k)).toFixed(1) + ' MB/s';
+                    if (bytesPerSec >= k)     return (bytesPerSec / k).toFixed(0) + ' KB/s';
+                    return bytesPerSec.toFixed(0) + ' B/s';
+                },
+
+                formatETA(secs) {
+                    if (!secs || secs <= 0) return '';
+                    if (secs < 60)  return secs + 's';
+                    if (secs < 3600) return Math.floor(secs / 60) + 'm ' + (secs % 60) + 's';
+                    return Math.floor(secs / 3600) + 'h ' + Math.floor((secs % 3600) / 60) + 'm';
                 },
 
                 async deleteFile(name) {
@@ -469,13 +597,46 @@ function serveFrontend() {
                         <i class="ph ph-upload-simple text-3xl text-gray-300"></i>
                     </div>
                     <h3 class="text-lg font-medium text-white">Drop files here or click to upload</h3>
-                    <p class="text-sm text-gray-500 mt-2">Supports ZIP, MD, TXT, Images</p>
+                    <p class="text-sm text-gray-500 mt-2">Images &bull; Videos &bull; Archives &bull; Office Docs &bull; PDF &bull; Text</p>
                 </div>
             </div>
             
-            <!-- PROGRESS BAR -->
-            <div x-show="uploading" class="mt-4 bg-gray-800 rounded-full h-2 overflow-hidden">
-                <div class="bg-indigo-500 h-full transition-all duration-300 w-full animate-pulse"></div>
+            <!-- LIVE UPLOAD PROGRESS -->
+            <div x-show="uploading" x-cloak class="mt-4 bg-gray-800/80 border border-gray-700/60 rounded-2xl px-5 py-4 space-y-3">
+
+                <!-- File info row -->
+                <div class="flex items-center justify-between gap-2 text-sm">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i class="ph ph-file-arrow-up text-indigo-400 flex-shrink-0"></i>
+                        <span class="text-gray-200 truncate font-medium" x-text="currentFileName"></span>
+                    </div>
+                    <span class="flex-shrink-0 text-xs text-gray-400 font-medium"
+                          x-show="totalFiles > 1"
+                          x-text="'File ' + currentFileIndex + ' / ' + totalFiles"></span>
+                </div>
+
+                <!-- Progress bar -->
+                <div class="w-full bg-gray-900 rounded-full h-2.5 overflow-hidden">
+                    <div class="bg-indigo-500 h-full rounded-full transition-all duration-150"
+                         :style="'width:' + uploadProgress + '%'"></div>
+                </div>
+
+                <!-- Stats row -->
+                <div class="flex items-center justify-between text-xs text-gray-400 font-mono">
+                    <!-- Left: bytes -->
+                    <span x-text="formatSize(uploadedBytes) + ' / ' + formatSize(totalBytes)"></span>
+
+                    <!-- Center: percentage -->
+                    <span class="text-indigo-400 font-semibold text-sm" x-text="uploadProgress + '%'"></span>
+
+                    <!-- Right: speed + ETA -->
+                    <div class="flex items-center gap-2">
+                        <span x-show="uploadSpeed > 0" x-text="formatSpeed(uploadSpeed)"></span>
+                        <span x-show="uploadETA > 0" class="text-gray-500">
+                            &bull; ETA <span x-text="formatETA(uploadETA)"></span>
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -529,12 +690,20 @@ function serveFrontend() {
                         <template x-if="file.is_image">
                             <img :src="file.url" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
                         </template>
-                        <template x-if="!file.is_image">
-                            <i class="ph ph-file-zip text-4xl text-gray-600" x-show="file.name.endsWith('.zip')"></i>
-                            <i class="ph ph-file-text text-4xl text-gray-600" x-show="!file.name.endsWith('.zip')"></i>
+                        <template x-if="file.is_video">
+                            <video :src="file.url" class="w-full h-full object-cover opacity-80" muted preload="metadata"></video>
                         </template>
-                        
-                        <!-- OVERLAY ACTIONS REMOVED -->
+                        <template x-if="!file.is_image && !file.is_video">
+                            <i class="ph text-4xl text-gray-600"
+                               :class="{
+                                   'ph-file-zip': file.is_zip,
+                                   'ph-file-pdf': file.name.endsWith('.pdf'),
+                                   'ph-microsoft-excel-logo': ['xls','xlsx','ods','csv'].includes(file.name.split('.').pop()),
+                                   'ph-microsoft-word-logo': ['doc','docx','odt','rtf'].includes(file.name.split('.').pop()),
+                                   'ph-microsoft-powerpoint-logo': ['ppt','pptx','odp'].includes(file.name.split('.').pop()),
+                                   'ph-file-text': !file.is_zip && !file.name.endsWith('.pdf')
+                               }"></i>
+                        </template>
                     </div>
 
                     <!-- INFO -->
